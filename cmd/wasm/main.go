@@ -2,7 +2,6 @@ package main
 
 import (
 	"syscall/js"
-	"time"
 )
 
 type JsFunc func(this js.Value, args []js.Value) interface{}
@@ -14,15 +13,16 @@ func main() {
 		panic("document is null")
 	}
 	doc.Call("addEventListener", "mousemove", js.FuncOf(handleMouseMove()))
-
-	go func() {
-		timer := time.Tick(100 * time.Millisecond)
-		for now := range timer {
-			println(now.String())
-		}
-	}()
+	js.Global().Set("update", js.FuncOf(handleUpdate()))
 
 	<-quit
+}
+
+func handleUpdate() JsFunc {
+	return func(_ js.Value, _ []js.Value) interface{} {
+		println("update program")
+		return nil
+	}
 }
 
 func handleMouseMove() JsFunc {

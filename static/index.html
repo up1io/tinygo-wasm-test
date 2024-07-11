@@ -38,5 +38,23 @@
             .catch(console.error)
     }
 </script>
+<script type="application/javascript">
+    let lastTime = 0;
+
+    function loop(currentTime) {
+        const deltaTime = currentTime - lastTime;
+        if (deltaTime > 16.67) {
+            lastTime = currentTime;
+
+            // call wasm update
+            update();
+            console.log('Frame rendered at', new Date().toISOString());
+        }
+
+        requestAnimationFrame(loop);
+    }
+
+    requestAnimationFrame(loop);
+</script>
 </body>
 </html>
