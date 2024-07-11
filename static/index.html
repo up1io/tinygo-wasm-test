@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WASM - Test</title>
+</head>
+<body>
+<h1>WASM - Event Listener Test</h1>
+<script type="application/javascript" src="/js/wasm_exec_tiny.js"></script>
+<script type="application/javascript">
+    const go = new Go();
+
+    // Note: TinyGo does not support finalizers so this should never be called.
+    // (https://github.com/tinygo-org/tinygo/issues/1140)
+    go.importObject.gojs["syscall/js.finalizeRef"] = _ => 0
+
+    const WASM_URL = "/js/main.wasm";
+
+    let wasm;
+
+    if ('instantiateStreaming' in WebAssembly) {
+        WebAssembly.instantiateStreaming(fetch(WASM_URL), go.importObject).then(function (obj) {
+            wasm = obj.instance;
+            go.run(wasm);
+        })
+    } else {
+        fetch(WASM_URL).then(resp =>
+            resp.arrayBuffer()
+        )
+            .then(bytes =>
+                WebAssembly.instantiate(bytes, go.importObject).then(function (obj) {
+                    wasm = obj.instance;
+                    go.run(wasm);
+
+                    window.wasm = wasm;
+                })
+            )
+            .catch(console.error)
+    }
+</script>
+</body>
+</html>
